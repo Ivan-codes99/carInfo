@@ -1,6 +1,7 @@
 #Reddit bot that gives information on a specific car
 import praw
 import os
+import requests
 
 #creating reddit instance
 def login(client_id, client_secret, username, password, user_agent):
@@ -34,6 +35,22 @@ def get_saved_comments():
 
     return comments_replied_to
 
+def requesting():
+    api_token = ""
+    api_secret = ""
+
+    login_url = ""
+    login_data = {
+        "api_token": api_token,
+        "api_secret": api_secret
+    }
+    response = requests.post(login_url, json = login_data)
+    if response.status_code == 200:
+        jwt_token = response.text.strip()
+        print("JWT Token:", jwt_token)
+    else:
+        print("Authentication failed. Status code:", response.status_code)
+
 #Creating a set of car models, short set for testing purposes right now
 car_models = {"camry", "corolla", "civic", "brz", "86", "supra", "m3", "accord"}
 
@@ -42,14 +59,15 @@ id = ""
 secret = ""
 usrname = ""
 passwd = ""
-agent = ""
 
+agent = "my car app"
 
 
 reddit = login(id, secret, usrname, passwd, agent)
 comments_replied_to = get_saved_comments()
-while True:
-    run_bot(reddit, comments_replied_to)
+# while True:
+#     run_bot(reddit, comments_replied_to)
+requesting()
 
 
 
