@@ -2,6 +2,7 @@
 import praw
 import os
 import requests
+import json
 
 #creating reddit instance
 def login(client_id, client_secret, username, password, user_agent):
@@ -39,17 +40,39 @@ def requesting():
     api_token = ""
     api_secret = ""
 
-    login_url = ""
+    login_url = "https://carapi.app/api/auth/login"
     login_data = {
         "api_token": api_token,
         "api_secret": api_secret
     }
+
     response = requests.post(login_url, json = login_data)
     if response.status_code == 200:
         jwt_token = response.text.strip()
         print("JWT Token:", jwt_token)
     else:
         print("Authentication failed. Status code:", response.status_code)
+
+    api_url = "https://carapi.app/api/models"
+    headers = {
+        'accept': 'application/json',
+        'Authorization' : f'Bearer {jwt_token}'
+    }
+
+    search_criteria = {
+    "year": 2020,
+    "make": "ford"
+}
+
+    response = requests.get(api_url, params = search_criteria, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+    else:
+        print("API request failed. Status code:", response.status_code)
+
+
 
 #Creating a set of car models, short set for testing purposes right now
 car_models = {"camry", "corolla", "civic", "brz", "86", "supra", "m3", "accord"}
