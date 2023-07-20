@@ -2,7 +2,6 @@
 import praw
 import os
 import requests
-import json
 
 #creating reddit instance
 def login(client_id, client_secret, username, password, user_agent):
@@ -36,10 +35,8 @@ def get_saved_comments():
 
     return comments_replied_to
 
-def requesting():
-    api_token = ""
-    api_secret = ""
-
+def Authorize():
+    
     login_url = "https://carapi.app/api/auth/login"
     login_data = {
         "api_token": api_token,
@@ -48,50 +45,64 @@ def requesting():
 
     response = requests.post(login_url, json = login_data)
     if response.status_code == 200:
-        jwt_token = response.text.strip()
-        print("JWT Token:", jwt_token)
+         global jwt_token
+         jwt_token = response.text.strip()
+         print("JWT Token:", jwt_token)
     else:
         print("Authentication failed. Status code:", response.status_code)
 
-    api_url = "https://carapi.app/api/models"
+
+def fetchCarModels():
+    api_url = "https://carapi.app/api/models?year=2020"
+    year = "year=2020"
+    currpage = 1
     headers = {
         'accept': 'application/json',
         'Authorization' : f'Bearer {jwt_token}'
     }
+    search_params = {
+        "year": 2020,
+    }
 
-    search_criteria = {
-    "year": 2020,
-    "make": "ford"
-}
+    while api_url:
+        response = requests.get(api_url, params = search_params, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            car_models.extend(item["name"] for item in data["data"])
 
-    response = requests.get(api_url, params = search_criteria, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()
-        print(data)
-    else:
-        print("API request failed. Status code:", response.status_code)
-
-
-
-#Creating a set of car models, short set for testing purposes right now
-car_models = {"camry", "corolla", "civic", "brz", "86", "supra", "m3", "accord"}
-
+            if "next" in data["collection"] != "":
+                currpage +=1
+                api_url = "https://carapi.app" + "/api/models?page=" + str(currpage) + "&" + year
+            else:
+                api_url = None
+        else:
+            print("API request failed. Status code:", response.status_code)
+            break
+            
+    
 #initializing
-id = ""
-secret = ""
 usrname = ""
 passwd = ""
-
-agent = "my car app"
-
+agent = ""
+id = ""
+secret = ""
 
 reddit = login(id, secret, usrname, passwd, agent)
 comments_replied_to = get_saved_comments()
 # while True:
 #     run_bot(reddit, comments_replied_to)
-requesting()
 
+
+car_models = []
+api_token = ""
+api_secret = ""
+jwt_token = ""
+
+Authorize()
+fetchCarModels()
+
+for item in car_models:
+    print(item)
 
 
 
