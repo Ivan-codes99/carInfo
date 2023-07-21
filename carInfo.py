@@ -22,8 +22,10 @@ def run_bot(r, comments_replied_to):
         # print(lst_str_comment)
         for word in lst_str_comment:
             if word in [model.lower() for model in car_models] and (comment.id not in comments_replied_to) and (comment.author != r.user.me()): #conditionals check for comment author and previously replied to comments
-                print("Beep boop: Car model " + word + " is found in comment.")
-                comment.reply("Beep boop: Car model: " + word + " found in comment.")
+                model_trims = fetchTrims(word)
+                str_model_trims = ', '.join(str(element) for element in model_trims)
+                print("Beep boop: Car model: " + word + " found in comment." + "\n" + "Availabe trims: " + str_model_trims)
+                comment.reply("Beep boop: Car model: " + word + " found in comment." + "\n" + "Availabe trims: " + str_model_trims)
                 comments_replied_to.append(comment.id)
 
                 with open("savedComments.txt", "a") as pc:
@@ -64,7 +66,7 @@ def fetchCarModels():
         'Authorization' : f'Bearer {jwt_token}'
     }
     search_params = {
-        "year": 2020,
+        "year": 2020
     }
 
     while api_url:
@@ -72,7 +74,6 @@ def fetchCarModels():
         if response.status_code == 200:
             data = response.json()
             car_models.extend(item["name"] for item in data["data"])
-
             if "next" in data["collection"] != "":
                 currpage +=1
                 api_url = "https://carapi.app" + "/api/models?page=" + str(currpage) + "&" + year
@@ -81,7 +82,31 @@ def fetchCarModels():
         else:
             print("API request failed. Status code:", response.status_code)
             break
-            
+
+def fetchTrims(model, year="year=2020"):
+    model = model.capitalize()
+    set_trims = set()
+    api_url = "https://carapi.app/api/trims?" + year + "&model=" + model
+    headers = {
+        'accept': 'application/json',
+        'Authorization' : f'Bearer {jwt_token}'
+    }
+
+    search_params = {
+        "year": 2020
+    }
+    
+    while api_url:
+        response = requests.get(api_url, params = search_params, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            for item in data["data"]:
+                set_trims.add(item["name"])
+            break
+        else:
+            print("API request failed. Status code:", response.status_code)
+            break
+    return set_trims
     
 #initializing
 usrname = ""
