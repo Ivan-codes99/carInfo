@@ -2,6 +2,7 @@
 import praw
 import os
 import requests
+import re
 
 #creating reddit instance
 def login(client_id, client_secret, username, password, user_agent):
@@ -14,12 +15,15 @@ def login(client_id, client_secret, username, password, user_agent):
 
 def run_bot(r, comments_replied_to):
     subreddit = r.subreddit('test')  # Retrieve the subreddit object
-    
+    word_split_regex = re.compile(r'\W+|\d+')
     for comment in subreddit.comments(limit=10):
-        for item in car_models:
-            if item in comment.body and comment.id not in comments_replied_to and comment.author != r.user.me(): #conditionals check for comment author and previously replied to comments
-                comment.reply("Beep boop: Car model: " + item + " found in comment.")
-                print("Beep boop: Car model: " + item + " found in comment.")
+        lst_str_comment = word_split_regex.split(comment.body.lower())
+        # print("lst_str_comment is ")
+        # print(lst_str_comment)
+        for word in lst_str_comment:
+            if word in [model.lower() for model in car_models] and (comment.id not in comments_replied_to) and (comment.author != r.user.me()): #conditionals check for comment author and previously replied to comments
+                print("Beep boop: Car model " + word + " is found in comment.")
+                comment.reply("Beep boop: Car model: " + word + " found in comment.")
                 comments_replied_to.append(comment.id)
 
                 with open("savedComments.txt", "a") as pc:
@@ -31,12 +35,11 @@ def get_saved_comments():
     else:
         with open("savedComments.txt", "r") as pc:
             comments_replied_to = pc.read()
-            comments_replied_to = comments_replied_to.split("/n")
-
+            comments_replied_to = comments_replied_to.split("\n")
+    
     return comments_replied_to
 
 def Authorize():
-    
     login_url = "https://carapi.app/api/auth/login"
     login_data = {
         "api_token": api_token,
@@ -89,9 +92,6 @@ secret = ""
 
 reddit = login(id, secret, usrname, passwd, agent)
 comments_replied_to = get_saved_comments()
-# while True:
-#     run_bot(reddit, comments_replied_to)
-
 
 car_models = []
 api_token = ""
@@ -100,9 +100,13 @@ jwt_token = ""
 
 Authorize()
 fetchCarModels()
+i=1
+while i <=10 :
+    run_bot(reddit, comments_replied_to)
+    i+=1
 
-for item in car_models:
-    print(item)
+
+
 
 
 
