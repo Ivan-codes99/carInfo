@@ -29,9 +29,9 @@ def run_bot(r, comments_replied_to):
                     model_trims = fetchTrims(word)
                     
                     str_model_trims = ', '.join(str(element) for element in model_trims)
-                    model_ext_colors = fetchExColors(word)
+                    model_ext_colors = fetch_exterior_colors(word)
                     str_model_ext_colors = ', '.join(str(element) for element in model_ext_colors)
-                    model_int_colors = fetchInColors(word)
+                    model_int_colors = fetch_interior_colors(word)
                     str_model_int_colors = ", ".join(str(element) for element in model_int_colors)
                     model_body_types = fetchBodyTypes(word)
                     str_model_body_types = ", ".join(str(element) for element in model_body_types)
@@ -131,7 +131,7 @@ def fetchTrims(model, year="year=2020"):
     lst_trims = list(set_trims)    
     return lst_trims[:10]
 
-def fetchExColors(model, year="year=2020"):
+def fetch_exterior_colors(model, year="year=2020"):
     set_exterior_colors = set()
     api_url = "https://carapi.app/api/exterior-colors?year=2020&model=" + model
     headers = {
@@ -160,7 +160,7 @@ def fetchExColors(model, year="year=2020"):
     lst_exterior_colors = list(set_exterior_colors)
     return lst_exterior_colors[:5]
 
-def fetchInColors(model, year="year=2020"):
+def fetch_interior_colors(model, year="year=2020"):
     set_interior_colors = set()
     api_url = "https://carapi.app/api/interior-colors?year=2020&model=" + model
     headers = {
@@ -221,6 +221,8 @@ def fetchBodyTypes(model, year = "2020"):
     lst_body_types = list(set_body_types)
     return lst_body_types[:10]
     
+    
+
     
 #initializing
 usrname = ""
